@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Top 15 Movies: Directors and Critics' Nationality</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+
+    <style>
+        body {
+            display: flex;
+        }
+
+        #map {
+            flex: 1;
+            height: 100vh;
+        }
+
+        #articlePlace {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #f8f8f8;
+        }
+
+        #select-menu {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1;
+        }
+
+        #headPlace {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1;
+            background: white;
+            padding: 5px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <div id="articlePlace">Details will appear here.</div>
+
+    <script type="text/javascript" src="geo-data copy 2.js"></script>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoieXc0MzU5IiwiYSI6ImNtNDRuNXBpZzBud2cya3E1cWFkMGhtcHkifQ.hzP9BzyUiaasokD2IjBwaA';
+
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/light-v11',
+            center: [0, 0],
+            zoom: 2,
+            projection: 'naturalEarth'
+        });
+
+        map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+
+        var popup = new mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: false
+        });
+
+        map.on('load', function () {
+            infoData.features.forEach(function (feature, index) {
+                feature.id = index + 1;
+            });
+
+            map.addSource('geojson-data', {
+                type: 'geojson',
+                data: infoData
+            });
+
+            map.addLayer({
+                id: 'data-points',
+                type: 'circle',
+                source: 'geojson-data',
+                paint: {
+                    'circle-radius': ['get', 'radius'],
+                    'circle-color': ['get', 'color'],
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': '#000'
+                }
+            });
+
+            map.on('mouseenter', 'data-points', function (e) {
+                map.getCanvas().style.cursor = 'pointer';
+                popup
+                    .setLngLat(e.features[0].geometry.coordinates)
+                    .setHTML(`<h4>${e.features[0].properties.headline}</h4>`)
+                    .addTo(map);
+            });
+
+            map.on('mouseleave', 'data-points', function () {
+                map.getCanvas().style.cursor = '';
+                popup.remove();
+            });
+
+            map.on('click', 'data-points', function (e) {
+                document.getElementById('articlePlace').innerHTML = e.features[0].properties.article;
+            });
+        });
+    </script>
+</body>
+
+</html>
