@@ -1,5 +1,0 @@
-flask
-sqlalchemy
-flask-sqlalchemy
-pandas
-gunicorn
